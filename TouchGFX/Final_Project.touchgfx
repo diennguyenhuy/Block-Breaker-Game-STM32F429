@@ -561,7 +561,7 @@
             "Name": "textArea2",
             "X": 7,
             "Y": 218,
-            "Width": 42,
+            "Width": 35,
             "Height": 24,
             "TextId": "__SingleUse_UAID",
             "TextRotation": "0",
