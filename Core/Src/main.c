@@ -97,6 +97,11 @@ uint8_t isRevD = 0; /* Applicable only for STM32F429I DISCOVERY REVD and above *
 ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart1;
 
+//Message queue
+osMessageQueueId_t buttonQueue;
+const osMessageQueueAttr_t buttonQueue_attributes = {
+	.name = "Button_Queue"
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -215,6 +220,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  buttonQueue = osMessageQueueNew(8, sizeof(uint8_t), &buttonQueue_attributes);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -1071,24 +1077,33 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
 
-	char buf[50];
+  char buf[50];
   /* Infinite loop */
   for(;;)
   {
 	  int left_button = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2) == GPIO_PIN_RESET;
-	  	int right_button = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3) == GPIO_PIN_RESET;
-	  	if (left_button && right_button) {
-	  		sprintf(buf, "Left + Right\n");
-	      } else if (left_button && !right_button) {
-	  		sprintf(buf, "Left\n");
-	  	} else if (!left_button && right_button) {
-	  		sprintf(buf, "Right\n");
-	  	} else {
-	  		sprintf(buf, "No button pressed\n");
-	  	}
+	  int right_button = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3) == GPIO_PIN_RESET;
 
-	  	HAL_UART_Transmit(&huart1, (const uint8_t*) buf, strlen(buf), 2);
-    osDelay(100);
+	  if (left_button && right_button) {
+	  	sprintf(buf, "Left + Right\n");
+	  	osDelay(10);
+	  } else if (left_button && !right_button) {
+		sprintf(buf, "Left\n");
+		uint8_t msg = 'L';
+		osMessageQueuePut(buttonQueue, &msg, 0, 10);
+	  	osDelay(10);
+	  } else if (!left_button && right_button) {
+	  	sprintf(buf, "Right\n");
+	  	uint8_t msg = 'R';
+	  	osMessageQueuePut(buttonQueue, &msg, 0, 10);
+	  	osDelay(10);
+	  } else {
+	  	sprintf(buf, "No button pressed\n");
+	  	osDelay(10);
+	  }
+	  //HAL_UART_Transmit(&huart1, (const uint8_t*) buf, strlen(buf), 2);
+
+	  osDelay(1);
   }
   /* USER CODE END 5 */
 }
