@@ -18,7 +18,8 @@ protected:
     int paddleX, paddleY, paddleWidth, paddleHeight;
     int paddleV = 2;
 
-    static const int MAX_BALL_SPEED = 2;
+    int currentMaxSpeed = 2;
+    void increaseDifficulty();
 
     bool blocksAlive[24];
     bool begin;

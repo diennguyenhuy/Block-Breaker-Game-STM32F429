@@ -16,6 +16,7 @@ void Screen1View::setupScreen()
     Screen1ViewBase::setupScreen();
 
     begin = false;
+    currentMaxSpeed = 2;
 
     ballX = circle1.getX();
     ballY = circle1.getY();
@@ -156,6 +157,8 @@ void Screen1View::checkBlockCollisions() {
 			blocksAlive[i] = false;
 			b->setVisible(false);
 			b->invalidate();
+
+			increaseDifficulty();
 			break;
 		}
 	}
@@ -186,18 +189,34 @@ static int isqrt(int n) {
 
 void Screen1View::capBallSpeed() {
 	int speedSq = ballVx * ballVx + ballVy * ballVy;
-	    const int maxSpeedSq = MAX_BALL_SPEED * MAX_BALL_SPEED;
+	    const int maxSpeedSq = currentMaxSpeed * currentMaxSpeed;
 
 	    if (speedSq > maxSpeedSq)
 	    {
 	        int speed = isqrt(speedSq);
 
 	        // Fixed-point scaling (Q8.8)
-	        int scale = (MAX_BALL_SPEED << 8) / speed;
+	        int scale = (currentMaxSpeed << 8) / speed;
 
 	        ballVx = (ballVx * scale) >> 8;
 	        ballVy = (ballVy * scale) >> 8;
 	    }
+}
+
+void Screen1View::increaseDifficulty() {
+    if (currentMaxSpeed < 5) {
+        currentMaxSpeed++;
+        if (ballVx > 0) ballVx++; else ballVx--;
+        if (ballVy > 0) ballVy++; else ballVy--;
+    }
+
+    if (paddleWidth > 30) {
+        int reduction = 4;
+        box1.invalidate();
+        paddleWidth -= reduction;
+        box1.setWidth(paddleWidth);
+        box1.invalidate();
+    }
 }
 
 void Screen1View::render() {
