@@ -480,6 +480,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_logo.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/generated/image_pngfind.com-minecraft-heart-png-697698123.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_pngfind.com-minecraft-heart-png-697698123.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/generated/image_startup.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_startup.cpp</locationURI>

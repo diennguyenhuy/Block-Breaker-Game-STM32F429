@@ -7,7 +7,7 @@
         "Components": [
           {
             "Type": "Image",
-            "Name": "Image4",
+            "Name": "Background",
             "Width": 320,
             "Height": 240,
             "RelativeFilename": "background.png"
@@ -478,7 +478,7 @@
           },
           {
             "Type": "Box",
-            "Name": "box1",
+            "Name": "Paddle",
             "X": 130,
             "Y": 218,
             "Width": 60,
@@ -491,7 +491,7 @@
           },
           {
             "Type": "Circle",
-            "Name": "circle1",
+            "Name": "Ball",
             "X": 155,
             "Y": 208,
             "Width": 10,
@@ -509,10 +509,10 @@
           },
           {
             "Type": "TextArea",
-            "Name": "textArea1",
+            "Name": "Score",
             "X": 8,
             "Y": 223,
-            "Width": 80,
+            "Width": 40,
             "Height": 15,
             "TextId": "__SingleUse_V053",
             "TextRotation": "0",
@@ -524,9 +524,24 @@
           },
           {
             "Type": "TextArea",
-            "Name": "textArea2",
-            "X": 240,
-            "Y": 225,
+            "Name": "ScoreText",
+            "X": 48,
+            "Y": 223,
+            "Width": 66,
+            "Height": 15,
+            "TextId": "__SingleUse_X2AK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "Lives",
+            "X": 227,
+            "Y": 220,
             "Width": 80,
             "Height": 15,
             "TextId": "__SingleUse_UAID",
@@ -536,6 +551,33 @@
               "Green": 255,
               "Blue": 255
             }
+          },
+          {
+            "Type": "Image",
+            "Name": "heart3",
+            "X": 299,
+            "Y": 220,
+            "Width": 17,
+            "Height": 17,
+            "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "heart1",
+            "X": 265,
+            "Y": 220,
+            "Width": 17,
+            "Height": 17,
+            "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "heart2",
+            "X": 282,
+            "Y": 220,
+            "Width": 17,
+            "Height": 17,
+            "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
           }
         ],
         "Interactions": [

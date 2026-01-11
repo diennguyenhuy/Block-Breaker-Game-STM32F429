@@ -6,6 +6,9 @@
   <Texts>
     <TextGroup Id="Group1" />
     <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_X2AK" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB"></Translation>
+      </Text>
       <Text Id="__SingleUse_UAID" Alignment="Left" TypographyId="Small">
         <Translation Language="GB">Lives:&#10;</Translation>
       </Text>

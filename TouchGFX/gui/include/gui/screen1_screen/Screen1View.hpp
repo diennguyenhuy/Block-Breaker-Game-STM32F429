@@ -3,6 +3,7 @@
 
 #include <gui_generated/screen1_screen/Screen1ViewBase.hpp>
 #include <gui/screen1_screen/Screen1Presenter.hpp>
+#include <touchgfx/Unicode.hpp>
 
 class Screen1View : public Screen1ViewBase
 {
@@ -17,7 +18,9 @@ protected:
     int ballVx = 2, ballVy = -2;
     int paddleX, paddleY, paddleWidth, paddleHeight;
     int paddleV = 2;
-
+    int lives = 3;
+    int score = 0;
+    Unicode::UnicodeChar scoreBuffer[10];
     static const int MAX_BALL_SPEED = 2;
 
     bool blocksAlive[24];
@@ -61,6 +64,8 @@ private:
     bool intersectPaddle();
     bool intersectBox(touchgfx::BoxWithBorder* b);
     void capBallSpeed();
+    void loseLife();
+    void Plus1000(int blockindex);
 };
 
 #endif // SCREEN1VIEW_HPP

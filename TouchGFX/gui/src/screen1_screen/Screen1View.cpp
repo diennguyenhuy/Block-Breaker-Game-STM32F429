@@ -1,10 +1,13 @@
 #include <gui/screen1_screen/Screen1View.hpp>
 #include <touchgfx/widgets/BoxWithBorder.hpp>
 #include <touchgfx/widgets/canvas/Circle.hpp>
+#include <touchgfx/Unicode.hpp>
 #include <touchgfx/widgets/TextArea.hpp>
 #include "main.h"
 #include "cmsis_os.h"
 #include "math.h"
+#include "stdio.h"
+#include "string.h"
 
 Screen1View::Screen1View()
 {
@@ -76,6 +79,28 @@ void Screen1View::updateBall() {
 		ballY += ballVy;
 	}
 }
+void Screen1View::loseLife()
+{
+    lives--;
+
+    if (lives > 0)
+    {
+        resetBall();   // đặt bóng lại lên paddle
+    }
+    else
+    {
+        // GAME OVER
+        begin = false;
+
+        // Ví dụ: dừng bóng hẳn
+        ballVx = 0;
+        ballVy = 0;
+
+        // TODO (sau này):
+        // - Hiện GAME OVER
+        // - Chuyển màn hình
+    }
+}
 
 void Screen1View::checkWallCollision() {
 	if (ballX <= 0 || ballX + 2*ballRadius >= HAL::DISPLAY_WIDTH) {
@@ -87,7 +112,7 @@ void Screen1View::checkWallCollision() {
 	}
 
 	if (ballY + 2*ballRadius >= HAL::DISPLAY_HEIGHT) {
-		resetBall();
+		loseLife();
 	}
 }
 
@@ -120,11 +145,25 @@ bool Screen1View::intersectBox(touchgfx::BoxWithBorder* b) {
 	int boxY = b->getY();
 	int boxWidth = b->getWidth();
 	int boxHeight = b->getHeight();
-
 	return ballX + 2*ballRadius >= boxX && ballX <= boxX + boxWidth &&
 			ballY + 2*ballRadius >= boxY && ballY <= boxY + boxHeight;
 }
+void Screen1View::addScore(int points)
+{
 
+    score += points;                     // update internal counter
+
+    Unicode::snprintf(scoreBuffer, 10, "%d", score);
+    ScoreText.setWildcard(scoreBuffer);
+    ScoreText.invalidate();
+}
+void Screen1View::Plus1000(int blockindex)
+{
+     if(blockindex % 6 ==0)
+     {
+    	 addScore(1000);
+     }
+}
 void Screen1View::checkBlockCollisions() {
 	for (int i = 0; i < 24; i++) {
 		if (!blocksAlive[i]) continue;
@@ -156,6 +195,9 @@ void Screen1View::checkBlockCollisions() {
 			blocksAlive[i] = false;
 			b->setVisible(false);
 			b->invalidate();
+
+			addScore(20);
+			Plus1000(i);
 			break;
 		}
 	}
