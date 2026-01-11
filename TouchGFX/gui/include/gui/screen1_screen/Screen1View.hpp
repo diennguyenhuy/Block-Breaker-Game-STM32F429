@@ -3,6 +3,9 @@
 
 #include <gui_generated/screen1_screen/Screen1ViewBase.hpp>
 #include <gui/screen1_screen/Screen1Presenter.hpp>
+#include <touchgfx/widgets/BoxWithBorder.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <touchgfx/Unicode.hpp>
 
 class Screen1View : public Screen1ViewBase
 {
@@ -14,16 +17,19 @@ public:
     virtual void tickEvent();
 protected:
     int ballX, ballY, ballRadius;
-    int ballVx = 2, ballVy = -2;
+    int ballVx, ballVy;
     int paddleX, paddleY, paddleWidth, paddleHeight;
-    int paddleV = 2;
-
-    static const int MAX_BALL_SPEED = 2;
-
-    bool blocksAlive[24];
+    int paddleV = 3;
     bool begin;
 
-    touchgfx::BoxWithBorder* blocks[24] = {
+    static const int MAX_BALL_SPEED = 3;
+    static const int MIN_BALL_SPEED = 2;
+    static const int START_BALL_SPEED = 3;
+
+    bool blocksAlive[24];
+    int countBlocksAlive = 24;
+
+    BoxWithBorder* blocks[24] = {
             &boxWithBorder01,
         	&boxWithBorder02,
         	&boxWithBorder03,
@@ -50,6 +56,16 @@ protected:
         	&boxWithBorder24
         };
 
+    Image* hearts[3] = {
+    		&heart1,
+			&heart2,
+			&heart3
+    };
+    int lives = 3;
+    int score = 0;
+
+    int delayTicks = 0;;
+
 private:
     void updatePaddle();
     void updateBall();
@@ -59,8 +75,13 @@ private:
     void checkBlockCollisions();
     void render();
     bool intersectPaddle();
-    bool intersectBox(touchgfx::BoxWithBorder* b);
+    bool intersectBox(BoxWithBorder* b);
     void capBallSpeed();
+    void initBallSpeed();
+    void addScore(int points);
+    void loseLife();
+    void newRound();
+    void switchGameOverScreen();
 };
 
 #endif // SCREEN1VIEW_HPP

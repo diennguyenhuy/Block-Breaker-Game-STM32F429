@@ -1086,21 +1086,19 @@ void StartDefaultTask(void *argument)
 
 	  if (left_button && right_button) {
 	  	sprintf(buf, "Left + Right\n");
-	  	osDelay(10);
 	  } else if (left_button && !right_button) {
 		sprintf(buf, "Left\n");
 		uint8_t msg = 'L';
 		osMessageQueuePut(buttonQueue, &msg, 0, 10);
-	  	osDelay(10);
 	  } else if (!left_button && right_button) {
 	  	sprintf(buf, "Right\n");
 	  	uint8_t msg = 'R';
 	  	osMessageQueuePut(buttonQueue, &msg, 0, 10);
-	  	osDelay(10);
 	  } else {
 	  	sprintf(buf, "No button pressed\n");
-	  	osDelay(10);
 	  }
+	  osDelay(10);
+
 	  //HAL_UART_Transmit(&huart1, (const uint8_t*) buf, strlen(buf), 2);
 
 	  osDelay(1);

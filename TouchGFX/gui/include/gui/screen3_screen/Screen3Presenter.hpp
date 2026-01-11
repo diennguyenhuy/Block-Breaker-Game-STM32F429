@@ -1,17 +1,17 @@
-#ifndef SCREEN1PRESENTER_HPP
-#define SCREEN1PRESENTER_HPP
+#ifndef SCREEN3PRESENTER_HPP
+#define SCREEN3PRESENTER_HPP
 
 #include <gui/model/ModelListener.hpp>
 #include <mvp/Presenter.hpp>
 
 using namespace touchgfx;
 
-class Screen1View;
+class Screen3View;
 
-class Screen1Presenter : public touchgfx::Presenter, public ModelListener
+class Screen3Presenter : public touchgfx::Presenter, public ModelListener
 {
 public:
-    Screen1Presenter(Screen1View& v);
+    Screen3Presenter(Screen3View& v);
 
     /**
      * The activate function is called automatically when this screen is "switched in"
@@ -25,14 +25,12 @@ public:
      */
     virtual void deactivate();
 
-    virtual ~Screen1Presenter() {}
-
-    void gotoGameOver();
+    virtual ~Screen3Presenter() {}
 
 private:
-    Screen1Presenter();
+    Screen3Presenter();
 
-    Screen1View& view;
+    Screen3View& view;
 };
 
-#endif // SCREEN1PRESENTER_HPP
+#endif // SCREEN3PRESENTER_HPP

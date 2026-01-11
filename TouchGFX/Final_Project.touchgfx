@@ -512,30 +512,81 @@
             "Name": "textArea1",
             "X": 8,
             "Y": 223,
-            "Width": 80,
-            "Height": 15,
+            "Width": 86,
+            "Height": 17,
             "TextId": "__SingleUse_V053",
             "TextRotation": "0",
             "Color": {
               "Red": 255,
               "Green": 255,
               "Blue": 255
+            },
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 10
             }
           },
           {
-            "Type": "TextArea",
-            "Name": "textArea2",
-            "X": 240,
-            "Y": 225,
-            "Width": 80,
-            "Height": 15,
-            "TextId": "__SingleUse_UAID",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 255,
-              "Green": 255,
-              "Blue": 255
-            }
+            "Type": "Container",
+            "Name": "heartContainer",
+            "X": 259,
+            "Y": 208,
+            "Width": 51,
+            "Height": 32,
+            "Components": [
+              {
+                "Type": "Image",
+                "Name": "heart1_noblood",
+                "Y": 15,
+                "Width": 17,
+                "Height": 17,
+                "RelativeFilename": "minecraft-heart-no-blood.png"
+              },
+              {
+                "Type": "Image",
+                "Name": "heart2_noblood",
+                "X": 17,
+                "Y": 15,
+                "Width": 17,
+                "Height": 17,
+                "RelativeFilename": "minecraft-heart-no-blood.png"
+              },
+              {
+                "Type": "Image",
+                "Name": "heart3_noblood",
+                "X": 34,
+                "Y": 15,
+                "Width": 17,
+                "Height": 17,
+                "RelativeFilename": "minecraft-heart-no-blood.png"
+              },
+              {
+                "Type": "Image",
+                "Name": "heart1",
+                "Y": 15,
+                "Width": 17,
+                "Height": 17,
+                "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
+              },
+              {
+                "Type": "Image",
+                "Name": "heart2",
+                "X": 17,
+                "Y": 15,
+                "Width": 17,
+                "Height": 17,
+                "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
+              },
+              {
+                "Type": "Image",
+                "Name": "heart3",
+                "X": 34,
+                "Y": 15,
+                "Width": 17,
+                "Height": 17,
+                "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
+              }
+            ]
           }
         ],
         "Interactions": [
@@ -548,6 +599,17 @@
             "Action": {
               "Type": "ActionCustom",
               "FunctionName": "tickEvent"
+            }
+          },
+          {
+            "InteractionName": "Interaction2",
+            "Trigger": {
+              "Type": "TriggerNone"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionBlock",
+              "ActionComponent": "Screen3"
             }
           }
         ]
@@ -593,6 +655,64 @@
               "Type": "ActionGotoScreen",
               "ScreenTransitionType": "ScreenTransitionBlock",
               "ActionComponent": "Screen1"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Screen3",
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "image1",
+            "Width": 320,
+            "Height": 240,
+            "RelativeFilename": "background.png"
+          },
+          {
+            "Type": "Button",
+            "Name": "button1",
+            "X": 88,
+            "Y": 132,
+            "Width": 145,
+            "Height": 30,
+            "Pressed": "replay.png",
+            "Released": "replay.png"
+          },
+          {
+            "Type": "Button",
+            "Name": "button2",
+            "X": 122,
+            "Y": 176,
+            "Width": 76,
+            "Height": 30,
+            "Pressed": "return.png",
+            "Released": "return.png"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button1"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionBlock",
+              "ActionComponent": "Screen1"
+            }
+          },
+          {
+            "InteractionName": "Interaction2",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionBlock",
+              "ActionComponent": "Screen2"
             }
           }
         ]
