@@ -510,6 +510,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_replay.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/generated/image_resize9x9.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_resize9x9.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/generated/image_return.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_return.cpp</locationURI>

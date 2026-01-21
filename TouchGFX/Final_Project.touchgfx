@@ -587,6 +587,15 @@
                 "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
               }
             ]
+          },
+          {
+            "Type": "Image",
+            "Name": "heartPowerUp",
+            "X": 327,
+            "Y": 111,
+            "Width": 9,
+            "Height": 9,
+            "RelativeFilename": "resize9x9.png"
           }
         ],
         "Interactions": [
