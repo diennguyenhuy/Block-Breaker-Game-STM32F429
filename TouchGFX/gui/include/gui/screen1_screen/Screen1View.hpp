@@ -7,28 +7,6 @@
 #include <touchgfx/widgets/Image.hpp>
 #include <touchgfx/Unicode.hpp>
 
-// Power-up types enum
-enum PowerUpType {
-    POWERUP_NONE = 0,
-    POWERUP_EXTRA_LIFE,      // Lấy lại 1 mạng (Regain 1 life)
-    POWERUP_EXTEND_PADDLE,   // Làm dài bệ phóng (Lengthen paddle)
-    POWERUP_DOUBLE_BALL      // Nhân đôi bóng (Double ball)
-};
-
-// Power-up structure
-struct PowerUp {
-    int x;                   // X position
-    int y;                   // Y position
-    int width;              // Width of power-up
-    int height;             // Height of power-up
-    int velocityY;          // Fall speed (positive = downward)
-    PowerUpType type;       // Type of power-up
-    bool active;            // Is this power-up currently active/falling?
-    
-    PowerUp() : x(0), y(0), width(20), height(20), velocityY(2), 
-                type(POWERUP_NONE), active(false) {}
-};
-
 class Screen1View : public Screen1ViewBase
 {
 public:
@@ -44,9 +22,19 @@ protected:
     int paddleV = 3;
     bool begin;
 
+    bool powerUpActive; //Is there a power-up on screen
+    bool powerUpFalling;
+    int powerUpBlockIndex=-1; // Which block has the power-up
+    int powerUpVy;
+    int powerUpX, powerUpY;
+
     static const int MAX_BALL_SPEED = 3;
     static const int MIN_BALL_SPEED = 2;
     static const int START_BALL_SPEED = 3;
+    static const int MAX_LIVES = 3;
+    static const int POWERUP_FALL_SPEED=1;
+
+
 
     bool blocksAlive[24];
     int countBlocksAlive = 24;
@@ -83,25 +71,14 @@ protected:
 			&heart2,
 			&heart3
     };
+    Image* powerUpHeart;
     int lives = 3;
     int score = 0;
 
-    int delayTicks = 0;
+    int delayTicks = 0;;
 
-    // Power-up system variables
-    static const int MAX_POWERUPS = 5;           // Maximum simultaneous power-ups
-    static const int POWERUP_SPAWN_CHANCE = 30;  // % chance to spawn on block break
-    static const int POWERUP_FALL_SPEED = 2;     // Pixels per tick
-    static const int POWERUP_WIDTH = 20;         // Power-up width
-    static const int POWERUP_HEIGHT = 20;        // Power-up height
-    
-    PowerUp powerUps[MAX_POWERUPS];              // Array of power-ups
-    
-    // Paddle extension power-up state
-    int originalPaddleWidth = 0;                 // Store original paddle width
-    int paddleExtensionTimer = 0;                // Timer for paddle extension duration
-    static const int PADDLE_EXTENSION_DURATION = 300;  // Ticks (~5 seconds at 60fps)
-    static const int PADDLE_EXTENSION_MULTIPLIER = 15; // Pixels to add to paddle
+    int heartBlockIndex = -1;
+    bool heartActive = false;
 
 
 private:
@@ -120,16 +97,11 @@ private:
     void loseLife();
     void newRound();
     void switchGameOverScreen();
-    
-    // Power-up system functions
-    void spawnPowerUp(int x, int y);             // Spawn a random power-up
-    void updatePowerUps();                        // Update all active power-ups
-    void checkPowerUpCollisions();                // Check paddle-powerup collisions
-    void applyPowerUp(PowerUpType type);          // Apply power-up effect
-    bool intersectPowerUp(PowerUp* p);            // Check if paddle intersects power-up
-    void updatePaddleExtension();                 // Update paddle extension timer
-    void renderPowerUps();                        // Render falling power-ups on screen
-
+    void gainLife();
+    void spawnPowerUp();
+    void updatePowerUp();
+    void checkPowerUpCollision();
+    bool intersectPowerUp();
 };
 
 #endif // SCREEN1VIEW_HPP
