@@ -590,8 +590,8 @@
           },
           {
             "Type": "Image",
-            "Name": "heartPowerUp",
-            "X": 327,
+            "Name": "plus1Life",
+            "X": 333,
             "Y": 111,
             "Width": 9,
             "Height": 9,
