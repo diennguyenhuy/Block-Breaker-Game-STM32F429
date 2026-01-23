@@ -27,8 +27,6 @@ public:
 
     virtual ~Screen1Presenter() {}
 
-    void gotoGameOver();
-
 private:
     Screen1Presenter();
 

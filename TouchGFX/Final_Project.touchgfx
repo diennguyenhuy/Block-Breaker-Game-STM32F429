@@ -13,6 +13,44 @@
             "RelativeFilename": "background.png"
           },
           {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 5,
+            "Y": 223,
+            "Width": 86,
+            "Height": 17,
+            "TextId": "__SingleUse_V053",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea2",
+            "X": 130,
+            "Y": 223,
+            "Width": 86,
+            "Height": 17,
+            "TextId": "__SingleUse_JSRG",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
             "Type": "Container",
             "Name": "BlockContainer",
             "Width": 320,
@@ -508,25 +546,6 @@
             "CapPrecision": "Butt"
           },
           {
-            "Type": "TextArea",
-            "Name": "textArea1",
-            "X": 8,
-            "Y": 223,
-            "Width": 86,
-            "Height": 17,
-            "TextId": "__SingleUse_V053",
-            "TextRotation": "0",
-            "Color": {
-              "Red": 255,
-              "Green": 255,
-              "Blue": 255
-            },
-            "Wildcard1": {
-              "UseBuffer": true,
-              "BufferSize": 10
-            }
-          },
-          {
             "Type": "Container",
             "Name": "heartContainer",
             "X": 259,
@@ -587,6 +606,15 @@
                 "RelativeFilename": "pngfind.com-minecraft-heart-png-697698123.png"
               }
             ]
+          },
+          {
+            "Type": "Image",
+            "Name": "heartPowerUp",
+            "X": 363,
+            "Y": 112,
+            "Width": 9,
+            "Height": 9,
+            "RelativeFilename": "heart_powerup.png"
           }
         ],
         "Interactions": [

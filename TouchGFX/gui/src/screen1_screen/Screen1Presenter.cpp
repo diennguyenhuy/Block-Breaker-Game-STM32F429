@@ -18,7 +18,3 @@ void Screen1Presenter::deactivate()
 {
 
 }
-
-void Screen1Presenter::gotoGameOver() {
-	static_cast<FrontendApplication*>(touchgfx::Application::getInstance())->gotoScreen3ScreenBlockTransition();
-}

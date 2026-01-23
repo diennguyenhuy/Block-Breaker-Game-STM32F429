@@ -485,6 +485,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_button.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/generated/image_heart_powerup.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_heart_powerup.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/generated/image_image_3.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_image_3.cpp</locationURI>

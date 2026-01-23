@@ -77,6 +77,11 @@ void Screen1View::setupScreen()
     Unicode::snprintf(textArea1Buffer, 10, "%d", score);
     textArea1.invalidate();
 
+    Unicode::snprintf(textArea2Buffer, 10, "%d", ++round);
+    textArea2.invalidate();
+
+    spawnPowerUp();
+
     uint8_t _;
     while (osMessageQueueGetCount(buttonQueue) > 0) osMessageQueueGet(buttonQueue, &_, NULL, osWaitForever);
 }
@@ -89,9 +94,11 @@ void Screen1View::tearDownScreen()
 void Screen1View::tickEvent() {
 	updatePaddle();
 	updateBall();
+	updatePowerUp();
 	checkWallCollision();
 	checkPaddleCollision();
 	checkBlockCollisions();
+	checkPowerUpCollision();
 	render();
 	newRound();
 }
@@ -139,14 +146,6 @@ void Screen1View::checkWallCollision() {
 		//resetBall();
 		loseLife();
 	}
-}
-
-void Screen1View::resetBall() {
-	ballX = paddleX + paddleWidth/2 - ballRadius;
-	ballY = paddleY - 2*ballRadius;
-	circle1.moveTo(ballX, ballY);
-	begin = false;
-	initBallSpeed();
 }
 
 bool Screen1View::intersectPaddle() {
@@ -242,10 +241,28 @@ void Screen1View::render() {
 	circle1.invalidate();
 	box1.moveTo(paddleX, paddleY);
 	box1.invalidate();
+
+	this->heartPowerUp.invalidate();
+
 }
 
 void Screen1View::switchGameOverScreen() {
-	presenter->gotoGameOver();
+	application().gotoScreen3ScreenBlockTransition();
+}
+
+void Screen1View::resetBall() {
+	ballX = paddleX + paddleWidth/2 - ballRadius;
+	ballY = paddleY - 2*ballRadius;
+	circle1.moveTo(ballX, ballY);
+	begin = false;
+	initBallSpeed();
+}
+
+void Screen1View::gainLife() {
+	if (lives >= MAX_LIVES) return;
+	hearts[lives]->setVisible(true);
+	hearts[lives]->invalidate();
+	lives++;
 }
 
 void Screen1View::loseLife() {
@@ -275,5 +292,61 @@ void Screen1View::newRound() {
 			blocks[i]->invalidate();
 		}
 		countBlocksAlive = 24;
+
+	    Unicode::snprintf(textArea2Buffer, 10, "%d", ++round);
+	    textArea2.invalidate();
+
+	    spawnPowerUp();
 	}
+}
+
+void Screen1View::spawnPowerUp() {
+	//Heart Power Up
+	this->blockIxWithHeartPowerUp = HAL_GetTick() % 24;
+	int boxX = blocks[blockIxWithHeartPowerUp]->getX();
+	int boxY = blocks[blockIxWithHeartPowerUp]->getY();
+	int boxWidth = blocks[blockIxWithHeartPowerUp]->getWidth();
+	int boxHeight = blocks[blockIxWithHeartPowerUp]->getHeight();
+
+	int heartX = heartPowerUp.getX();
+	int heartY = heartPowerUp.getY();
+	int heartWidth = heartPowerUp.getWidth();
+	int heartHeight = heartPowerUp.getHeight();
+
+	heartX = boxX + boxWidth/2 - heartWidth/2;
+	heartY = boxY + boxHeight/2 - heartHeight/2;
+
+	this->heartPowerUp.moveTo(heartX, heartY);
+	this->heartPowerUp.setVisible(true);
+	this->heartPowerUp.invalidate();
+}
+
+void Screen1View::updatePowerUp() {
+	//Update Heart
+	if (!blocksAlive[blockIxWithHeartPowerUp]) {
+		this->heartPowerUp.moveRelative(0, POWERUP_FALL_SPEED);
+	}
+}
+
+bool Screen1View::intersectHeartPowerUp() {
+	if (blocksAlive[blockIxWithHeartPowerUp]) return false;
+
+	int heartPW_X = this->heartPowerUp.getX();
+	int heartPW_Y = this->heartPowerUp.getY();
+	int heartPW_Width = this->heartPowerUp.getWidth();
+	int heartPW_Height = this->heartPowerUp.getHeight();
+
+	return heartPW_X + heartPW_Width >= paddleX && heartPW_X <= paddleX + paddleWidth &&
+				heartPW_Y + heartPW_Height >= paddleY && heartPW_Y <= paddleY + paddleHeight;
+
+}
+
+void Screen1View::checkPowerUpCollision() {
+	//check Heart collision
+	if (intersectHeartPowerUp()) {
+		gainLife();
+		this->heartPowerUp.setVisible(false);
+		heartPowerUp.moveRelative(0, 30); //make the heart fall out of screen
+	}
+
 }

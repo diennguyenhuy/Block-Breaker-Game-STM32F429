@@ -22,9 +22,9 @@ protected:
     int paddleV = 3;
     bool begin;
 
-    static const int MAX_BALL_SPEED = 3;
+    static const int MAX_BALL_SPEED = 2;
     static const int MIN_BALL_SPEED = 2;
-    static const int START_BALL_SPEED = 3;
+    static const int START_BALL_SPEED = 2;
 
     bool blocksAlive[24];
     int countBlocksAlive = 24;
@@ -61,27 +61,41 @@ protected:
 			&heart2,
 			&heart3
     };
+    static const int MAX_LIVES = 3;
     int lives = 3;
     int score = 0;
+    int round = 0;
 
-    int delayTicks = 0;;
+    int blockIxWithHeartPowerUp;
+    static const int POWERUP_FALL_SPEED = 1;
+
+    int delayTicks = 0;
 
 private:
+    //Paddle and Wall logic
     void updatePaddle();
     void updateBall();
     void resetBall();
     void checkWallCollision();
     void checkPaddleCollision();
     void checkBlockCollisions();
-    void render();
     bool intersectPaddle();
     bool intersectBox(BoxWithBorder* b);
+    void render();
+    //Ball speed functionalities
     void capBallSpeed();
     void initBallSpeed();
+    //Score, life logic
     void addScore(int points);
+    void gainLife();
     void loseLife();
     void newRound();
     void switchGameOverScreen();
+    //PowerUp logic
+    void spawnPowerUp();
+    void updatePowerUp();
+    void checkPowerUpCollision();
+    bool intersectHeartPowerUp();
 };
 
 #endif // SCREEN1VIEW_HPP
