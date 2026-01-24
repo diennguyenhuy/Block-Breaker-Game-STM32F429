@@ -15,6 +15,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
     virtual void tickEvent();
+    int getScore() const;
 protected:
     int ballX, ballY, ballRadius;
     int ballVx, ballVy;
@@ -67,9 +68,15 @@ protected:
     int round = 0;
 
     int blockIxWithHeartPowerUp;
+    int blockIxWithArrowPowerUp;
     static const int POWERUP_FALL_SPEED = 1;
 
-    int delayTicks = 0;
+    uint32_t paddleExtendStartTick;
+    bool isPaddleExtended = false;
+    //int paddleExtendedWidth;
+    int paddleNormalWidth;
+    static const int PADDLE_EXTENSION = 40;
+    static constexpr uint32_t PADDLE_EXTENSION_DURATION = 6000;
 
 private:
     //Paddle and Wall logic
@@ -96,6 +103,8 @@ private:
     void updatePowerUp();
     void checkPowerUpCollision();
     bool intersectHeartPowerUp();
+    bool intersectArrowPowerUp();
+    void checkPaddleExtensionTimeout();
 };
 
 #endif // SCREEN1VIEW_HPP

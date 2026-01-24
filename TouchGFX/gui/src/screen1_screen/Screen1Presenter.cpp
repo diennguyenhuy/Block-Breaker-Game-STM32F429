@@ -16,5 +16,5 @@ void Screen1Presenter::activate()
 
 void Screen1Presenter::deactivate()
 {
-
+	this->model->setScore(this->view.getScore());
 }

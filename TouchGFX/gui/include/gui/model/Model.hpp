@@ -14,8 +14,15 @@ public:
     }
 
     void tick();
+
+    void setScore(int score);
+    int getScore() const;
+
+    int getHighScore() const;
 protected:
     ModelListener* modelListener;
+    int score;
+    int highScore = 0;
 };
 
 #endif // MODEL_HPP

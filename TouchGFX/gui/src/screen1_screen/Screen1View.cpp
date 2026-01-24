@@ -9,6 +9,8 @@
 #include "stdio.h"
 #include "string.h"
 
+static int delayTicks = 0;
+
 static const int launchTable[][2] = {
     { -2, -4 },
     { -1, -4 },
@@ -72,6 +74,8 @@ void Screen1View::setupScreen()
     paddleWidth = box1.getWidth();
     paddleHeight = box1.getHeight();
 
+    paddleNormalWidth = paddleWidth;
+
     for (int i = 0; i < 24; i++) blocksAlive[i] = true;
 
     Unicode::snprintf(textArea1Buffer, 10, "%d", score);
@@ -99,6 +103,7 @@ void Screen1View::tickEvent() {
 	checkPaddleCollision();
 	checkBlockCollisions();
 	checkPowerUpCollision();
+	checkPaddleExtensionTimeout();
 	render();
 	newRound();
 }
@@ -116,7 +121,7 @@ void Screen1View::updatePaddle() {
 			break;
 		case 'R':
 			paddleX += paddleV;
-			if (paddleX + paddleWidth >= HAL::DISPLAY_WIDTH) {
+			if (paddleX + paddleWidth > HAL::DISPLAY_WIDTH) {
 				paddleX = HAL::DISPLAY_WIDTH - paddleWidth;
 			} else begin = true;
 			break;
@@ -246,6 +251,10 @@ void Screen1View::render() {
 
 }
 
+int Screen1View::getScore() const {
+	return this->score;
+}
+
 void Screen1View::switchGameOverScreen() {
 	application().gotoScreen3ScreenBlockTransition();
 }
@@ -319,12 +328,38 @@ void Screen1View::spawnPowerUp() {
 	this->heartPowerUp.moveTo(heartX, heartY);
 	this->heartPowerUp.setVisible(true);
 	this->heartPowerUp.invalidate();
+
+	//Extend paddle (Arrow) Power Up
+	do {
+		this->blockIxWithArrowPowerUp = HAL_GetTick() % 24;
+	} while (this->blockIxWithArrowPowerUp == this->blockIxWithHeartPowerUp);
+	boxX = blocks[blockIxWithArrowPowerUp]->getX();
+	boxY = blocks[blockIxWithArrowPowerUp]->getY();
+	boxWidth = blocks[blockIxWithArrowPowerUp]->getWidth();
+	boxHeight = blocks[blockIxWithArrowPowerUp]->getHeight();
+
+	int arrowX = extendPowerUp.getX();
+	int arrowY = extendPowerUp.getY();
+	int arrowWidth = extendPowerUp.getWidth();
+	int arrowHeight = extendPowerUp.getHeight();
+
+	arrowX = boxX + boxWidth/2 - arrowWidth/2;
+	arrowY = boxY + boxHeight/2 - arrowHeight/2;
+
+	this->extendPowerUp.moveTo(arrowX, arrowY);
+	this->extendPowerUp.setVisible(true);
+	this->extendPowerUp.invalidate();
 }
 
 void Screen1View::updatePowerUp() {
 	//Update Heart
 	if (!blocksAlive[blockIxWithHeartPowerUp]) {
 		this->heartPowerUp.moveRelative(0, POWERUP_FALL_SPEED);
+	}
+
+	//Update Arrow
+	if (!blocksAlive[blockIxWithArrowPowerUp]) {
+		this->extendPowerUp.moveRelative(0, POWERUP_FALL_SPEED);
 	}
 }
 
@@ -341,6 +376,19 @@ bool Screen1View::intersectHeartPowerUp() {
 
 }
 
+bool Screen1View::intersectArrowPowerUp() {
+	if (blocksAlive[blockIxWithArrowPowerUp]) return false;
+
+	int arrowX = this->extendPowerUp.getX();
+	int arrowY = this->extendPowerUp.getY();
+	int arrowWidth = this->extendPowerUp.getWidth();
+	int arrowHeight = this->extendPowerUp.getHeight();
+
+	return arrowX + arrowWidth >= paddleX && arrowX <= paddleX + paddleWidth &&
+			arrowY + arrowHeight >= paddleY && arrowY <= paddleY + paddleHeight;
+
+}
+
 void Screen1View::checkPowerUpCollision() {
 	//check Heart collision
 	if (intersectHeartPowerUp()) {
@@ -349,4 +397,29 @@ void Screen1View::checkPowerUpCollision() {
 		heartPowerUp.moveRelative(0, 30); //make the heart fall out of screen
 	}
 
+	//check Arrow collision
+	if (intersectArrowPowerUp() && !isPaddleExtended) {
+		paddleWidth += PADDLE_EXTENSION;
+		this->box1.setWidth(paddleWidth);
+		if (paddleX + paddleWidth > HAL::DISPLAY_WIDTH) {
+			paddleX = HAL::DISPLAY_WIDTH - paddleWidth;
+		}
+		this->box1.invalidate();
+		isPaddleExtended = true;
+		paddleExtendStartTick = HAL_GetTick();
+	}
+
+}
+
+void Screen1View::checkPaddleExtensionTimeout() {
+	if (!isPaddleExtended) return;
+
+	uint32_t now = HAL_GetTick();
+	if (now - paddleExtendStartTick >= PADDLE_EXTENSION_DURATION) {
+		isPaddleExtended = false;
+
+		paddleWidth = paddleNormalWidth;
+		this->box1.setWidth(paddleWidth);
+		this->box1.invalidate();
+	}
 }

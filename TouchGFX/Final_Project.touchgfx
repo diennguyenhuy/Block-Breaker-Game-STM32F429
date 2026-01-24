@@ -615,6 +615,15 @@
             "Width": 9,
             "Height": 9,
             "RelativeFilename": "heart_powerup.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "extendPowerUp",
+            "X": 352,
+            "Y": 92,
+            "Width": 30,
+            "Height": 12,
+            "RelativeFilename": "arrow_powerup.png"
           }
         ],
         "Interactions": [
@@ -670,6 +679,25 @@
             "Height": 30,
             "Pressed": "button.png",
             "Released": "button.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 103,
+            "Y": 120,
+            "Width": 115,
+            "Height": 17,
+            "TextId": "__SingleUse_WYJY",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 209,
+              "Green": 42,
+              "Blue": 164
+            },
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
           }
         ],
         "Interactions": [
@@ -716,6 +744,44 @@
             "Height": 30,
             "Pressed": "return.png",
             "Released": "return.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 88,
+            "Y": 38,
+            "Width": 145,
+            "Height": 15,
+            "TextId": "__SingleUse_J40X",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 209,
+              "Green": 42,
+              "Blue": 164
+            },
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea2",
+            "X": 88,
+            "Y": 93,
+            "Width": 145,
+            "Height": 16,
+            "TextId": "__SingleUse_QRXR",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 209,
+              "Green": 42,
+              "Blue": 164
+            },
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 10
+            }
           }
         ],
         "Interactions": [

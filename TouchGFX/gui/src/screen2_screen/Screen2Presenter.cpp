@@ -16,3 +16,7 @@ void Screen2Presenter::deactivate()
 {
 
 }
+
+int Screen2Presenter::getHighScore() {
+	return this->model->getHighScore();
+}

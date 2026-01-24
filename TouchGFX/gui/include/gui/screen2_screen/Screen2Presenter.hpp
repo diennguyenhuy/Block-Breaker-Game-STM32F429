@@ -26,6 +26,7 @@ public:
     virtual void deactivate();
 
     virtual ~Screen2Presenter() {}
+    int getHighScore();
 
 private:
     Screen2Presenter();

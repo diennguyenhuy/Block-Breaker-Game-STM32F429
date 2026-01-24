@@ -16,3 +16,11 @@ void Screen3Presenter::deactivate()
 {
 
 }
+
+int Screen3Presenter::getScore() {
+	return this->model->getScore();
+}
+
+int Screen3Presenter::getHighScore() {
+	return this->model->getHighScore();
+}

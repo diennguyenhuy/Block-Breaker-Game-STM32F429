@@ -27,6 +27,9 @@ public:
 
     virtual ~Screen3Presenter() {}
 
+    int getScore();
+    int getHighScore();
+
 private:
     Screen3Presenter();
 
