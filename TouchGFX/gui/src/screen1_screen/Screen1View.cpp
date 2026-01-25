@@ -139,12 +139,17 @@ void Screen1View::updateBall() {
 }
 
 void Screen1View::checkWallCollision() {
-	if (ballX <= 0 || ballX + 2*ballRadius >= HAL::DISPLAY_WIDTH) {
-		ballVx = -ballVx;
+	if (ballX <= 0) {
+		ballX = 0;
+		ballVx = abs(ballVx);
+	} else if (ballX + 2*ballRadius >= HAL::DISPLAY_WIDTH) {
+		ballX = HAL::DISPLAY_WIDTH - 2*ballRadius;
+		ballVx = -abs(ballVx);
 	}
 
 	if (ballY <= 0) {
-		ballVy = -ballVy;
+		ballY = 0;
+		ballVy = abs(ballVy);
 	}
 
 	if (ballY + 2*ballRadius >= HAL::DISPLAY_HEIGHT) {
@@ -160,7 +165,8 @@ bool Screen1View::intersectPaddle() {
 
 void Screen1View::checkPaddleCollision() {
 	if (intersectPaddle() && ballVy > 0) {
-		ballVy = -ballVy;
+		ballY = paddleY - 2*ballRadius; // Clamping
+		ballVy = -abs(ballVy);
 
 		int hitPos = (ballX + ballRadius) - paddleX;
 		int center = paddleWidth/2;
