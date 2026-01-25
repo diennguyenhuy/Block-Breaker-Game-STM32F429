@@ -6,6 +6,7 @@
 #include <touchgfx/widgets/BoxWithBorder.hpp>
 #include <touchgfx/widgets/Image.hpp>
 #include <touchgfx/Unicode.hpp>
+#include <touchgfx/widgets/canvas/PainterRGB565.hpp>
 
 class Screen1View : public Screen1ViewBase
 {
@@ -19,9 +20,14 @@ public:
 protected:
     int ballX, ballY, ballRadius;
     int ballVx, ballVy;
+    int ball2X, ball2Y, ball2Vx, ball2Vy;
     int paddleX, paddleY, paddleWidth, paddleHeight;
     int paddleV = 3;
     bool begin;
+    bool ball2Active = false;
+
+    touchgfx::Circle circle2;
+    touchgfx::PainterRGB565 circle2Painter;
 
     static const int MAX_BALL_SPEED = 2;
     static const int MIN_BALL_SPEED = 2;
@@ -69,6 +75,9 @@ protected:
 
     int blockIxWithHeartPowerUp;
     int blockIxWithArrowPowerUp;
+    int blockIxWithMultiBallPowerUp;
+    Image multiBallPowerUp;
+
     static const int POWERUP_FALL_SPEED = 1;
 
     uint32_t paddleExtendStartTick;
@@ -82,16 +91,23 @@ private:
     //Paddle and Wall logic
     void updatePaddle();
     void updateBall();
+    void updateBall2();
     void resetBall();
+    void resetBall2();
     void checkWallCollision();
+    void checkWallCollision2();
     void checkPaddleCollision();
+    void checkPaddleCollision2();
     void checkBlockCollisions();
+    void checkBlockCollisions2();
     bool intersectPaddle();
-    bool intersectBox(BoxWithBorder* b);
+    bool intersectPaddle2();
+    bool intersectBox(BoxWithBorder* b, int ballX, int ballY);
     void render();
     //Ball speed functionalities
-    void capBallSpeed();
+    void capBallSpeed(int& vx, int& vy);
     void initBallSpeed();
+    void initBall2Speed();
     //Score, life logic
     void addScore(int points);
     void gainLife();
@@ -104,6 +120,7 @@ private:
     void checkPowerUpCollision();
     bool intersectHeartPowerUp();
     bool intersectArrowPowerUp();
+    bool intersectMultiBallPowerUp();
     void checkPaddleExtensionTimeout();
 };
 
