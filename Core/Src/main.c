@@ -767,6 +767,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PG13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
@@ -1130,8 +1136,6 @@ void StartDefaultTask(void *argument)
 	  osDelay(10);
 
 	  //HAL_UART_Transmit(&huart1, (const uint8_t*) buf, strlen(buf), 2);
-
-	  osDelay(1);
   }
   /* USER CODE END 5 */
 }

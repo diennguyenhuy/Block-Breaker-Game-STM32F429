@@ -10,6 +10,7 @@
 #include "string.h"
 
 static int delayTicks = 0;
+static int soundTicks = 0;
 
 static const int launchTable[][2] = {
     { -2, -4 },
@@ -49,6 +50,18 @@ static uint32_t gen_rand() {
 	uint32_t random;
 	while (HAL_RNG_GenerateRandomNumber(&hrng, &random) != HAL_OK);
 	return random;
+}
+
+static void startSound() {
+	HAL_GPIO_WritePin(GPIOG, GPIO_PIN_13, GPIO_PIN_SET);
+	soundTicks++;
+}
+
+static void endSound() {
+	if (++soundTicks > 10) {
+		soundTicks = 0;
+		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_13, GPIO_PIN_RESET);
+	}
 }
 
 void Ball::initSpeed() {
@@ -97,16 +110,19 @@ void Ball::normalizeSpeed()
 }
 
 
-Screen1View::Screen1View() : ball(circle1), paddle(box1, 3)
+Screen1View::Screen1View() : mainBall(circle1, circle1Painter), powerUpBall(circle2, circle2Painter), paddle(box1, 3)
 {
-
+	balls[0] = &mainBall;
+	balls[1] = &powerUpBall;
 }
 
-Ball::Ball(Circle& c) : ballObject(c) {
+Ball::Ball(Circle& c, PainterRGB565& p) : ballObject(c), ballObjectPainter(p) {
 	this->x = c.getX();
 	this->y = c.getY();
 	c.getRadius(this->r);
 	initSpeed();
+	this->begin = false;
+	this->alive = true;
 }
 
 Paddle::Paddle(Box& b, int v) : v(v), paddleObject(b) {
@@ -121,8 +137,6 @@ Paddle::Paddle(Box& b, int v) : v(v), paddleObject(b) {
 void Screen1View::setupScreen()
 {
     Screen1ViewBase::setupScreen();
-
-    begin = false;
 
     for (int i = 0; i < 24; i++) blocksAlive[i] = true;
 
@@ -145,7 +159,7 @@ void Screen1View::tearDownScreen()
 
 void Screen1View::tickEvent() {
 	updatePaddle();
-	updateBall();
+	updateBalls();
 	updatePowerUp();
 	checkWallCollision();
 	checkPaddleCollision();
@@ -154,6 +168,7 @@ void Screen1View::tickEvent() {
 	checkPaddleExtensionTimeout();
 	render();
 	newRound();
+	endSound();
 }
 
 void Screen1View::updatePaddle() {
@@ -165,13 +180,13 @@ void Screen1View::updatePaddle() {
 			paddle.x -= paddle.v;
 			if (paddle.x <= 0) {
 				paddle.x = 0;
-			} else begin = true;
+			} else mainBall.begin = true;
 			break;
 		case 'R':
 			paddle.x += paddle.v;
 			if (paddle.x + paddle.w > HAL::DISPLAY_WIDTH) {
 				paddle.x = HAL::DISPLAY_WIDTH - paddle.w;
-			} else begin = true;
+			} else mainBall.begin = true;
 			break;
 		default:
 			break;
@@ -179,101 +194,131 @@ void Screen1View::updatePaddle() {
 	}
 }
 
-void Screen1View::updateBall() {
-	if (begin) {
-		ball.x += ball.vx;
-		ball.y += ball.vy;
+void Screen1View::updateBalls() {
+	for (int i = 0; i < MAX_NUM_BALLS; i++) {
+		if (balls[i]->begin) {
+			balls[i]->x += balls[i]->vx;
+			balls[i]->y += balls[i]->vy;
+		}
 	}
 }
 
 void Screen1View::checkWallCollision() {
-	if (ball.x <= 0) {
-		ball.x = 0;
-		ball.vx = abs(ball.vx);
-	} else if (ball.x + 2*ball.r >= HAL::DISPLAY_WIDTH) {
-		ball.x = HAL::DISPLAY_WIDTH - 2*ball.r;
-		ball.vx = -abs(ball.vx);
+	int ballsAlive = 0;
+	for (int i = 0; i < MAX_NUM_BALLS; i++) {
+
+		if (balls[i]->x <= 0) {
+			balls[i]->x = 0;
+			balls[i]->vx = abs(balls[i]->vx);
+			if (balls[i]->alive) startSound();
+		} else if (balls[i]->x + 2*balls[i]->r >= HAL::DISPLAY_WIDTH) {
+			balls[i]->x = HAL::DISPLAY_WIDTH - 2*balls[i]->r;
+			balls[i]->vx = -abs(balls[i]->vx);
+			if (balls[i]->alive) startSound();
+		}
+
+		if (balls[i]->y <= 0) {
+			balls[i]->y = 0;
+			balls[i]->vy = abs(balls[i]->vy);
+			startSound();
+		} else if (balls[i]->y + 2*balls[i]->r >= HAL::DISPLAY_HEIGHT) {
+			balls[i]->alive = false;
+		}
+		if (balls[i]->alive) ballsAlive++;
 	}
 
-	if (ball.y <= 0) {
-		ball.y = 0;
-		ball.vy = abs(ball.vy);
-	} else if (ball.y + 2*ball.r >= HAL::DISPLAY_HEIGHT) {
-		//resetBall();
-		loseLife();
-	}
+	if (ballsAlive == 0) loseLife();
 }
 
-bool Screen1View::intersectPaddle() {
-	return ball.x + 2*ball.r >= paddle.x && ball.x <= paddle.x + paddle.w &&
-			ball.y + 2*ball.r >= paddle.y && ball.y <= paddle.y + paddle.h;
+bool Screen1View::intersectPaddle(const Ball* ball) {
+	return ball->x + 2*ball->r >= paddle.x && ball->x <= paddle.x + paddle.w &&
+			ball->y + 2*ball->r >= paddle.y && ball->y <= paddle.y + paddle.h;
 }
 
 void Screen1View::checkPaddleCollision() {
-	if (intersectPaddle() && ball.vy > 0) {
-        //ball.y = paddle.y - 2 * ball.r - 1;
+	for (int i = 0; i < MAX_NUM_BALLS; i++) {
+		if (intersectPaddle(balls[i]) && balls[i]->vy > 0) {
+			startSound();
+	        int hitPos = (balls[i]->x + balls[i]->r) - paddle.x;
+	        int center = paddle.w / 2;
+	        int dx = hitPos - center;
 
-        int hitPos = (ball.x + ball.r) - paddle.x;
-        int center = paddle.w / 2;
-        int dx = hitPos - center;
+	        // Clamp hit distance
+	        if (dx > center) dx = center;
+	        if (dx < -center) dx = -center;
 
-        // Clamp hit distance
-        if (dx > center) dx = center;
-        if (dx < -center) dx = -center;
+	        // Change direction only
+	        balls[i]->vx = dx * Ball::MAX_BALL_SPEED / center;
+	        balls[i]->vy = -abs(balls[i]->vy);
 
-        // Change direction only
-        ball.vx = dx * Ball::MAX_BALL_SPEED / center;
-        ball.vy = -abs(ball.vy);
+	        balls[i]->vx += (HAL_GetTick() % 3) - 1;
 
-        ball.vx += (HAL_GetTick() % 3) - 1;
-
-		ball.normalizeSpeed();
+	        balls[i]->normalizeSpeed();
+		}
+	    // Prevent flat vertical shots
+	    if (balls[i]->vx == 0) balls[i]->vx = (HAL_GetTick() & 1) ? Ball::MIN_BALL_SPEED : -Ball::MIN_BALL_SPEED;
+		// Prevent straight horizontal shots
+		if (balls[i]->vy == 0) balls[i]->vy = -Ball::MIN_BALL_SPEED;
 	}
-    // Prevent flat vertical shots
-    if (ball.vx == 0) ball.vx = (HAL_GetTick() & 1) ? Ball::MIN_BALL_SPEED : -Ball::MIN_BALL_SPEED;
-	//Prevent straight horizontal shots
-	if (ball.vy == 0) ball.vy = -Ball::MIN_BALL_SPEED;
+
 }
 
-bool Screen1View::intersectBox(BoxWithBorder* b) {
-	int boxX = b->getX();
-	int boxY = b->getY();
-	int boxWidth = b->getWidth();
-	int boxHeight = b->getHeight();
+bool Screen1View::intersectBox(const BoxWithBorder* block, const Ball* ball) {
+	int boxX = block->getX();
+	int boxY = block->getY();
+	int boxWidth = block->getWidth();
+	int boxHeight = block->getHeight();
 
-	return ball.x + 2*ball.r >= boxX && ball.x <= boxX + boxWidth &&
-			ball.y + 2*ball.r >= boxY && ball.y <= boxY + boxHeight;
+	return ball->x + 2*ball->r >= boxX && ball->x <= boxX + boxWidth &&
+			ball->y + 2*ball->r >= boxY && ball->y <= boxY + boxHeight;
 }
 
 void Screen1View::checkBlockCollisions() {
-	for (int i = 0; i < 24; i++) {
-		if (!blocksAlive[i]) continue;
-		BoxWithBorder* b = blocks[i];
+	for (int i = 0; i < MAX_NUM_BALLS; i++) {
+		Ball* ball = balls[i];
+		if (ball->begin == false) continue;
 
-		if (intersectBox(b)) {
-			int boxX = b->getX();
-			int boxY = b->getY();
-			int boxWidth = b->getWidth();
-			int boxHeight = b->getHeight();
+		for (int j = 0; j < 24; j++) {
+			if (!blocksAlive[j]) continue;
+			BoxWithBorder* b = blocks[j];
 
-			int overlapLeft = (ball.x + 2*ball.r) - boxX;
-			int overlapRight = (boxX + boxWidth) - ball.x;
-			int overlapTop = (ball.y + 2*ball.r) - boxY;
-			int overlapBottom = (boxY + boxHeight) - ball.y;
+			if (intersectBox(b, ball)) {
+				startSound();
 
-			int minOverlapX = overlapLeft < overlapRight ? overlapLeft : overlapRight;
-			int minOverlapY = overlapTop < overlapBottom ? overlapTop : overlapBottom;
+				int boxX = b->getX();
+				int boxY = b->getY();
+				int boxWidth = b->getWidth();
+				int boxHeight = b->getHeight();
 
-			if (minOverlapX < minOverlapY) ball.vx = -ball.vx;
-			else ball.vy = -ball.vy;
+				int overlapLeft = (ball->x + 2*ball->r) - boxX;
+				int overlapRight = (boxX + boxWidth) - ball->x;
+				int overlapTop = (ball->y + 2*ball->r) - boxY;
+				int overlapBottom = (boxY + boxHeight) - ball->y;
 
-			blocksAlive[i] = false;
-			b->setVisible(blocksAlive[i]);
-			b->invalidate();
-			countBlocksAlive--;
-			addScore(20);
+				int minOverlapX = overlapLeft < overlapRight ? overlapLeft : overlapRight;
+				int minOverlapY = overlapTop < overlapBottom ? overlapTop : overlapBottom;
 
-			break;
+				if (minOverlapX < minOverlapY) ball->vx = -ball->vx;
+				else ball->vy = -ball->vy;
+
+				blocksAlive[j] = false;
+				b->setVisible(blocksAlive[j]);
+				b->invalidate();
+				countBlocksAlive--;
+				addScore(this->scores[j]);
+
+				if (j == blockIxWithDoubleBallPowerUp) {
+					powerUpBall.begin = true;
+					powerUpBall.alive = true;
+					powerUpBall.x = paddle.x + paddle.w/2 - powerUpBall.r;
+					powerUpBall.y = paddle.y - 2*powerUpBall.r;
+					powerUpBall.ballObject.moveTo(powerUpBall.x, powerUpBall.y);
+					powerUpBall.ballObjectPainter.setColor(blocks[blockIxWithDoubleBallPowerUp]->getColor());
+					powerUpBall.ballObject.invalidate();
+				}
+
+				break;
+			}
 		}
 	}
 }
@@ -285,8 +330,12 @@ void Screen1View::addScore(int points) {
 }
 
 void Screen1View::render() {
-	ball.ballObject.moveTo(ball.x, ball.y);
-	ball.ballObject.invalidate();
+	for (int i = 0; i < MAX_NUM_BALLS; i++) {
+		if (balls[i]->begin == false) continue;
+		balls[i]->ballObject.moveTo(balls[i]->x, balls[i]->y);
+		balls[i]->ballObject.invalidate();
+	}
+
 	paddle.paddleObject.moveTo(paddle.x, paddle.y);
 	paddle.paddleObject.invalidate();
 
@@ -295,20 +344,17 @@ void Screen1View::render() {
 
 }
 
-int Screen1View::getScore() const {
-	return this->score;
-}
-
 void Screen1View::switchGameOverScreen() {
 	application().gotoScreen3ScreenBlockTransition();
 }
 
 void Screen1View::resetBall() {
-	ball.x = paddle.x + paddle.w/2 - ball.r;
-	ball.y = paddle.y - 2*ball.r;
-	ball.ballObject.moveTo(ball.x, ball.y);
-	begin = false;
-	ball.initSpeed();
+	mainBall.x = paddle.x + paddle.w/2 - mainBall.r;
+	mainBall.y = paddle.y - 2*mainBall.r;
+	mainBall.ballObject.moveTo(mainBall.x, mainBall.y);
+	mainBall.begin = false;
+	mainBall.alive = true;
+	mainBall.initSpeed();
 }
 
 void Screen1View::gainLife() {
@@ -329,12 +375,12 @@ void Screen1View::loseLife() {
 	} else {
 		switchGameOverScreen();
 	}
-
 }
 
 void Screen1View::newRound() {
 	if (countBlocksAlive == 0) {
-		begin = false;
+		balls[0]->begin = false;
+		balls[1]->begin = false;
 	    if (++delayTicks < 60) return;
 	    delayTicks = 0;
 
@@ -346,7 +392,7 @@ void Screen1View::newRound() {
 		}
 		countBlocksAlive = 24;
 
-	    Unicode::snprintf(textArea2Buffer, 10, "%d", ++round);
+	    Unicode::snprintf(textArea2Buffer, TEXTAREA2_SIZE, "%d", ++round);
 	    textArea2.invalidate();
 
 	    spawnPowerUp();
@@ -393,6 +439,25 @@ void Screen1View::spawnPowerUp() {
 	this->extendPowerUp.moveTo(arrowX, arrowY);
 	this->extendPowerUp.setVisible(true);
 	this->extendPowerUp.invalidate();
+
+	//Double ball Power Up
+	do {
+		this->blockIxWithDoubleBallPowerUp = gen_rand() % 24;
+	} while (blockIxWithDoubleBallPowerUp == blockIxWithArrowPowerUp || blockIxWithDoubleBallPowerUp == blockIxWithHeartPowerUp);
+
+	boxX = blocks[blockIxWithDoubleBallPowerUp]->getX();
+	boxY = blocks[blockIxWithDoubleBallPowerUp]->getY();
+	boxWidth = blocks[blockIxWithDoubleBallPowerUp]->getWidth();
+	boxHeight = blocks[blockIxWithDoubleBallPowerUp]->getHeight();
+
+	powerUpBall.x = boxX + boxWidth/2 - powerUpBall.r;
+	powerUpBall.y = boxY + boxHeight/2 - powerUpBall.r;
+	powerUpBall.alive = false;
+	powerUpBall.begin = false;
+
+	powerUpBall.ballObject.moveTo(powerUpBall.x, powerUpBall.y);
+	powerUpBall.ballObjectPainter.setColor(colortype(0xFFFFFFFF));
+	powerUpBall.ballObject.invalidate();
 }
 
 void Screen1View::updatePowerUp() {

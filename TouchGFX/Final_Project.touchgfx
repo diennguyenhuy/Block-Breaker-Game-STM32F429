@@ -69,9 +69,9 @@
                   "Blue": 60
                 },
                 "BorderColor": {
-                  "Red": 230,
-                  "Green": 60,
-                  "Blue": 60
+                  "Red": 255,
+                  "Green": 127,
+                  "Blue": 127
                 },
                 "BorderSize": 1
               },
@@ -88,9 +88,9 @@
                   "Blue": 60
                 },
                 "BorderColor": {
-                  "Red": 230,
-                  "Green": 60,
-                  "Blue": 60
+                  "Red": 255,
+                  "Green": 127,
+                  "Blue": 127
                 },
                 "BorderSize": 1
               },
@@ -107,9 +107,9 @@
                   "Blue": 230
                 },
                 "BorderColor": {
-                  "Red": 62,
-                  "Green": 179,
-                  "Blue": 230
+                  "Red": 128,
+                  "Green": 219,
+                  "Blue": 255
                 },
                 "BorderSize": 1
               },
@@ -126,9 +126,9 @@
                   "Blue": 60
                 },
                 "BorderColor": {
-                  "Red": 230,
-                  "Green": 60,
-                  "Blue": 60
+                  "Red": 255,
+                  "Green": 127,
+                  "Blue": 127
                 },
                 "BorderSize": 1
               },
@@ -145,9 +145,9 @@
                   "Blue": 230
                 },
                 "BorderColor": {
-                  "Red": 62,
-                  "Green": 179,
-                  "Blue": 230
+                  "Red": 128,
+                  "Green": 219,
+                  "Blue": 255
                 },
                 "BorderSize": 1
               },
@@ -164,9 +164,9 @@
                   "Blue": 60
                 },
                 "BorderColor": {
-                  "Red": 230,
-                  "Green": 60,
-                  "Blue": 60
+                  "Red": 255,
+                  "Green": 127,
+                  "Blue": 127
                 },
                 "BorderSize": 1
               },
@@ -183,9 +183,9 @@
                   "Blue": 230
                 },
                 "BorderColor": {
-                  "Red": 62,
-                  "Green": 179,
-                  "Blue": 230
+                  "Red": 128,
+                  "Green": 219,
+                  "Blue": 255
                 },
                 "BorderSize": 1
               },
@@ -202,9 +202,9 @@
                   "Blue": 60
                 },
                 "BorderColor": {
-                  "Red": 230,
-                  "Green": 60,
-                  "Blue": 60
+                  "Red": 255,
+                  "Green": 127,
+                  "Blue": 127
                 },
                 "BorderSize": 1
               },
@@ -221,9 +221,9 @@
                   "Blue": 60
                 },
                 "BorderColor": {
-                  "Red": 230,
-                  "Green": 60,
-                  "Blue": 60
+                  "Red": 255,
+                  "Green": 127,
+                  "Blue": 127
                 },
                 "BorderSize": 1
               },
@@ -240,9 +240,9 @@
                   "Blue": 230
                 },
                 "BorderColor": {
-                  "Red": 62,
-                  "Green": 179,
-                  "Blue": 230
+                  "Red": 128,
+                  "Green": 219,
+                  "Blue": 255
                 },
                 "BorderSize": 1
               },
@@ -259,9 +259,9 @@
                   "Blue": 19
                 },
                 "BorderColor": {
-                  "Red": 237,
-                  "Green": 223,
-                  "Blue": 19
+                  "Red": 207,
+                  "Green": 197,
+                  "Blue": 58
                 },
                 "BorderSize": 1
               },
@@ -278,9 +278,9 @@
                   "Blue": 19
                 },
                 "BorderColor": {
-                  "Red": 237,
-                  "Green": 223,
-                  "Blue": 19
+                  "Red": 207,
+                  "Green": 197,
+                  "Blue": 58
                 },
                 "BorderSize": 1
               },
@@ -297,9 +297,9 @@
                   "Blue": 14
                 },
                 "BorderColor": {
-                  "Red": 26,
-                  "Green": 240,
-                  "Blue": 14
+                  "Red": 61,
+                  "Green": 196,
+                  "Blue": 51
                 },
                 "BorderSize": 1
               },
@@ -316,9 +316,9 @@
                   "Blue": 14
                 },
                 "BorderColor": {
-                  "Red": 26,
-                  "Green": 240,
-                  "Blue": 14
+                  "Red": 61,
+                  "Green": 196,
+                  "Blue": 51
                 },
                 "BorderSize": 1
               },
@@ -335,9 +335,9 @@
                   "Blue": 230
                 },
                 "BorderColor": {
-                  "Red": 62,
-                  "Green": 179,
-                  "Blue": 230
+                  "Red": 128,
+                  "Green": 219,
+                  "Blue": 255
                 },
                 "BorderSize": 1
               },
@@ -354,9 +354,9 @@
                   "Blue": 14
                 },
                 "BorderColor": {
-                  "Red": 26,
-                  "Green": 240,
-                  "Blue": 14
+                  "Red": 61,
+                  "Green": 196,
+                  "Blue": 51
                 },
                 "BorderSize": 1
               },
@@ -373,9 +373,9 @@
                   "Blue": 14
                 },
                 "BorderColor": {
-                  "Red": 26,
-                  "Green": 240,
-                  "Blue": 14
+                  "Red": 61,
+                  "Green": 196,
+                  "Blue": 51
                 },
                 "BorderSize": 1
               },
@@ -392,9 +392,9 @@
                   "Blue": 19
                 },
                 "BorderColor": {
-                  "Red": 237,
-                  "Green": 223,
-                  "Blue": 19
+                  "Red": 207,
+                  "Green": 197,
+                  "Blue": 58
                 },
                 "BorderSize": 1
               },
@@ -411,9 +411,9 @@
                   "Blue": 19
                 },
                 "BorderColor": {
-                  "Red": 237,
-                  "Green": 223,
-                  "Blue": 19
+                  "Red": 207,
+                  "Green": 197,
+                  "Blue": 58
                 },
                 "BorderSize": 1
               },
@@ -430,9 +430,9 @@
                   "Blue": 14
                 },
                 "BorderColor": {
-                  "Red": 26,
-                  "Green": 240,
-                  "Blue": 14
+                  "Red": 61,
+                  "Green": 196,
+                  "Blue": 51
                 },
                 "BorderSize": 1
               },
@@ -449,9 +449,9 @@
                   "Blue": 19
                 },
                 "BorderColor": {
-                  "Red": 237,
-                  "Green": 223,
-                  "Blue": 19
+                  "Red": 207,
+                  "Green": 197,
+                  "Blue": 58
                 },
                 "BorderSize": 1
               },
@@ -468,9 +468,9 @@
                   "Blue": 14
                 },
                 "BorderColor": {
-                  "Red": 26,
-                  "Green": 240,
-                  "Blue": 14
+                  "Red": 61,
+                  "Green": 196,
+                  "Blue": 51
                 },
                 "BorderSize": 1
               },
@@ -487,9 +487,9 @@
                   "Blue": 19
                 },
                 "BorderColor": {
-                  "Red": 237,
-                  "Green": 223,
-                  "Blue": 19
+                  "Red": 207,
+                  "Green": 197,
+                  "Blue": 58
                 },
                 "BorderSize": 1
               },
@@ -506,9 +506,9 @@
                   "Blue": 230
                 },
                 "BorderColor": {
-                  "Red": 62,
-                  "Green": 179,
-                  "Blue": 230
+                  "Red": 128,
+                  "Green": 219,
+                  "Blue": 255
                 },
                 "BorderSize": 1
               }
@@ -532,6 +532,24 @@
             "Name": "circle1",
             "X": 155,
             "Y": 208,
+            "Width": 10,
+            "Height": 10,
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "CenterX": 5.0,
+            "CenterY": 5.0,
+            "Radius": 5.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Butt"
+          },
+          {
+            "Type": "Circle",
+            "Name": "circle2",
+            "X": 359,
+            "Y": 134,
             "Width": 10,
             "Height": 10,
             "Color": {
