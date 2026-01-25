@@ -93,9 +93,10 @@ const osThreadAttr_t GUI_Task_attributes = {
 /* USER CODE BEGIN PV */
 uint8_t isRevD = 0; /* Applicable only for STM32F429I DISCOVERY REVD and above */
 
-//ADC, UART
+//ADC, UART, RNG
 ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart1;
+RNG_HandleTypeDef hrng;
 
 //Message queue
 osMessageQueueId_t buttonQueue;
@@ -149,6 +150,8 @@ uint16_t                  IOE_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *p
 static void MX_ADC1_Init(void);
 // UART INIT
 static void MX_USART1_UART_Init(void);
+//RNG INIT
+static void MX_RNG_Init(void);
 
 /* USER CODE END PFP */
 
@@ -201,6 +204,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   MX_ADC1_Init();
   MX_USART1_UART_Init();
+  MX_RNG_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -388,6 +392,32 @@ static void MX_USART1_UART_Init(void)
   /* USER CODE BEGIN USART1_Init 2 */
 
   /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+  * @brief RNG Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RNG_Init(void)
+{
+
+  /* USER CODE BEGIN RNG_Init 0 */
+
+  /* USER CODE END RNG_Init 0 */
+
+  /* USER CODE BEGIN RNG_Init 1 */
+
+  /* USER CODE END RNG_Init 1 */
+  hrng.Instance = RNG;
+  if (HAL_RNG_Init(&hrng) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RNG_Init 2 */
+
+  /* USER CODE END RNG_Init 2 */
 
 }
 

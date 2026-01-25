@@ -4,8 +4,35 @@
 #include <gui_generated/screen1_screen/Screen1ViewBase.hpp>
 #include <gui/screen1_screen/Screen1Presenter.hpp>
 #include <touchgfx/widgets/BoxWithBorder.hpp>
+#include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/widgets/canvas/Circle.hpp>
 #include <touchgfx/widgets/Image.hpp>
 #include <touchgfx/Unicode.hpp>
+
+struct Ball {
+	int x, y, r, vx, vy;
+	Circle& ballObject;
+    static const int MAX_BALL_SPEED = 3;
+    static const int MIN_BALL_SPEED = 2;
+    static const int START_BALL_SPEED = 2;
+
+    Ball(Circle& c);
+    void initSpeed();
+    void capSpeed();
+    void normalizeSpeed();
+};
+
+struct Paddle {
+	int x, y, w, h, v;
+	int normalw;
+	bool isExtended;
+	uint32_t extendStartTick;
+	Box& paddleObject;
+    static const int PADDLE_EXTENSION = 40;
+    static constexpr uint32_t PADDLE_EXTENSION_DURATION = 6000;
+
+    Paddle(Box& b, int v);
+};
 
 class Screen1View : public Screen1ViewBase
 {
@@ -17,15 +44,9 @@ public:
     virtual void tickEvent();
     int getScore() const;
 protected:
-    int ballX, ballY, ballRadius;
-    int ballVx, ballVy;
-    int paddleX, paddleY, paddleWidth, paddleHeight;
-    int paddleV = 3;
+    Ball ball;
+    Paddle paddle;
     bool begin;
-
-    static const int MAX_BALL_SPEED = 2;
-    static const int MIN_BALL_SPEED = 2;
-    static const int START_BALL_SPEED = 2;
 
     bool blocksAlive[24];
     int countBlocksAlive = 24;
@@ -71,13 +92,6 @@ protected:
     int blockIxWithArrowPowerUp;
     static const int POWERUP_FALL_SPEED = 1;
 
-    uint32_t paddleExtendStartTick;
-    bool isPaddleExtended = false;
-    //int paddleExtendedWidth;
-    int paddleNormalWidth;
-    static const int PADDLE_EXTENSION = 40;
-    static constexpr uint32_t PADDLE_EXTENSION_DURATION = 6000;
-
 private:
     //Paddle and Wall logic
     void updatePaddle();
@@ -89,9 +103,6 @@ private:
     bool intersectPaddle();
     bool intersectBox(BoxWithBorder* b);
     void render();
-    //Ball speed functionalities
-    void capBallSpeed();
-    void initBallSpeed();
     //Score, life logic
     void addScore(int points);
     void gainLife();

@@ -43,18 +43,79 @@ static int isqrt(int n) {
 }
 
 extern osMessageQueueId_t buttonQueue;
+extern RNG_HandleTypeDef hrng;
 
-void Screen1View::initBallSpeed() {
-	int i = HAL_GetTick() % (sizeof(launchTable)/sizeof(launchTable[0]));
-	ballVx = launchTable[i][0];
-	ballVy = launchTable[i][1];
-
-	capBallSpeed();
+static uint32_t gen_rand() {
+	uint32_t random;
+	while (HAL_RNG_GenerateRandomNumber(&hrng, &random) != HAL_OK);
+	return random;
 }
 
-Screen1View::Screen1View()
+void Ball::initSpeed() {
+	int i = gen_rand() % (sizeof(launchTable)/sizeof(launchTable[0]));
+	vx = launchTable[i][0];
+	vy = launchTable[i][1];
+
+	capSpeed();
+}
+
+void Ball::capSpeed() {
+    int speedSq = vx * vx + vy * vy;
+
+    if (speedSq == 0) return;
+
+    int speed = isqrt(speedSq);
+
+    // Clamp max speed
+    if (speed > MAX_BALL_SPEED)
+    {
+        vx = vx * MAX_BALL_SPEED / speed;
+        vy = vy * MAX_BALL_SPEED / speed;
+    }
+
+    // Enforce minimum vertical speed
+    if (abs(vy) < MIN_BALL_SPEED)
+        vy = (vy < 0) ? -MIN_BALL_SPEED : MIN_BALL_SPEED;
+
+    // Enforce minimum horizontal speed
+    if (abs(vx) < 1)
+        vx = (HAL_GetTick() & 1) ? 1 : -1;
+}
+
+void Ball::normalizeSpeed()
+{
+    int speedSq = vx * vx + vy * vy;
+    if (speedSq == 0) {
+    	vx = START_BALL_SPEED;
+    	vy = START_BALL_SPEED;
+    }
+
+    int speed = isqrt(speedSq);
+
+    vx = vx * MAX_BALL_SPEED / speed;
+    vy = vy * MAX_BALL_SPEED / speed;
+}
+
+
+Screen1View::Screen1View() : ball(circle1), paddle(box1, 3)
 {
 
+}
+
+Ball::Ball(Circle& c) : ballObject(c) {
+	this->x = c.getX();
+	this->y = c.getY();
+	c.getRadius(this->r);
+	initSpeed();
+}
+
+Paddle::Paddle(Box& b, int v) : v(v), paddleObject(b) {
+	this->x = b.getX();
+	this->y = b.getY();
+	this->w = b.getWidth();
+	this->h = b.getHeight();
+	this->normalw = w;
+	this->isExtended = false;
 }
 
 void Screen1View::setupScreen()
@@ -63,25 +124,12 @@ void Screen1View::setupScreen()
 
     begin = false;
 
-    initBallSpeed();
-
-    ballX = circle1.getX();
-    ballY = circle1.getY();
-    circle1.getRadius(ballRadius);
-
-    paddleX = box1.getX();
-    paddleY = box1.getY();
-    paddleWidth = box1.getWidth();
-    paddleHeight = box1.getHeight();
-
-    paddleNormalWidth = paddleWidth;
-
     for (int i = 0; i < 24; i++) blocksAlive[i] = true;
 
-    Unicode::snprintf(textArea1Buffer, 10, "%d", score);
+    Unicode::snprintf(textArea1Buffer, TEXTAREA1_SIZE, "%d", score);
     textArea1.invalidate();
 
-    Unicode::snprintf(textArea2Buffer, 10, "%d", ++round);
+    Unicode::snprintf(textArea2Buffer, TEXTAREA2_SIZE, "%d", ++round);
     textArea2.invalidate();
 
     spawnPowerUp();
@@ -114,15 +162,15 @@ void Screen1View::updatePaddle() {
 		osMessageQueueGet(buttonQueue, &res, NULL, 10);
 		switch (res) {
 		case 'L':
-			paddleX -= paddleV;
-			if (paddleX <= 0) {
-				paddleX = 0;
+			paddle.x -= paddle.v;
+			if (paddle.x <= 0) {
+				paddle.x = 0;
 			} else begin = true;
 			break;
 		case 'R':
-			paddleX += paddleV;
-			if (paddleX + paddleWidth > HAL::DISPLAY_WIDTH) {
-				paddleX = HAL::DISPLAY_WIDTH - paddleWidth;
+			paddle.x += paddle.v;
+			if (paddle.x + paddle.w > HAL::DISPLAY_WIDTH) {
+				paddle.x = HAL::DISPLAY_WIDTH - paddle.w;
 			} else begin = true;
 			break;
 		default:
@@ -133,42 +181,58 @@ void Screen1View::updatePaddle() {
 
 void Screen1View::updateBall() {
 	if (begin) {
-		ballX += ballVx;
-		ballY += ballVy;
+		ball.x += ball.vx;
+		ball.y += ball.vy;
 	}
 }
 
 void Screen1View::checkWallCollision() {
-	if (ballX <= 0 || ballX + 2*ballRadius >= HAL::DISPLAY_WIDTH) {
-		ballVx = -ballVx;
+	if (ball.x <= 0) {
+		ball.x = 0;
+		ball.vx = abs(ball.vx);
+	} else if (ball.x + 2*ball.r >= HAL::DISPLAY_WIDTH) {
+		ball.x = HAL::DISPLAY_WIDTH - 2*ball.r;
+		ball.vx = -abs(ball.vx);
 	}
 
-	if (ballY <= 0) {
-		ballVy = -ballVy;
-	}
-
-	if (ballY + 2*ballRadius >= HAL::DISPLAY_HEIGHT) {
+	if (ball.y <= 0) {
+		ball.y = 0;
+		ball.vy = abs(ball.vy);
+	} else if (ball.y + 2*ball.r >= HAL::DISPLAY_HEIGHT) {
 		//resetBall();
 		loseLife();
 	}
 }
 
 bool Screen1View::intersectPaddle() {
-	return ballX + 2*ballRadius >= paddleX && ballX <= paddleX + paddleWidth &&
-			ballY + 2*ballRadius >= paddleY && ballY <= paddleY + paddleHeight;
+	return ball.x + 2*ball.r >= paddle.x && ball.x <= paddle.x + paddle.w &&
+			ball.y + 2*ball.r >= paddle.y && ball.y <= paddle.y + paddle.h;
 }
 
 void Screen1View::checkPaddleCollision() {
-	if (intersectPaddle() && ballVy > 0) {
-		ballVy = -ballVy;
+	if (intersectPaddle() && ball.vy > 0) {
+        //ball.y = paddle.y - 2 * ball.r - 1;
 
-		int hitPos = (ballX + ballRadius) - paddleX;
-		int center = paddleWidth/2;
+        int hitPos = (ball.x + ball.r) - paddle.x;
+        int center = paddle.w / 2;
+        int dx = hitPos - center;
 
-		ballVx = (hitPos - center)/6;
+        // Clamp hit distance
+        if (dx > center) dx = center;
+        if (dx < -center) dx = -center;
 
-		capBallSpeed();
+        // Change direction only
+        ball.vx = dx * Ball::MAX_BALL_SPEED / center;
+        ball.vy = -abs(ball.vy);
+
+        ball.vx += (HAL_GetTick() % 3) - 1;
+
+		ball.normalizeSpeed();
 	}
+    // Prevent flat vertical shots
+    if (ball.vx == 0) ball.vx = (HAL_GetTick() & 1) ? Ball::MIN_BALL_SPEED : -Ball::MIN_BALL_SPEED;
+	//Prevent straight horizontal shots
+	if (ball.vy == 0) ball.vy = -Ball::MIN_BALL_SPEED;
 }
 
 bool Screen1View::intersectBox(BoxWithBorder* b) {
@@ -177,8 +241,8 @@ bool Screen1View::intersectBox(BoxWithBorder* b) {
 	int boxWidth = b->getWidth();
 	int boxHeight = b->getHeight();
 
-	return ballX + 2*ballRadius >= boxX && ballX <= boxX + boxWidth &&
-			ballY + 2*ballRadius >= boxY && ballY <= boxY + boxHeight;
+	return ball.x + 2*ball.r >= boxX && ball.x <= boxX + boxWidth &&
+			ball.y + 2*ball.r >= boxY && ball.y <= boxY + boxHeight;
 }
 
 void Screen1View::checkBlockCollisions() {
@@ -192,16 +256,16 @@ void Screen1View::checkBlockCollisions() {
 			int boxWidth = b->getWidth();
 			int boxHeight = b->getHeight();
 
-			int overlapLeft = (ballX + 2*ballRadius) - boxX;
-			int overlapRight = (boxX + boxWidth) - ballX;
-			int overlapTop = (ballY + 2*ballRadius) - boxY;
-			int overlapBottom = (boxY + boxHeight) - ballY;
+			int overlapLeft = (ball.x + 2*ball.r) - boxX;
+			int overlapRight = (boxX + boxWidth) - ball.x;
+			int overlapTop = (ball.y + 2*ball.r) - boxY;
+			int overlapBottom = (boxY + boxHeight) - ball.y;
 
 			int minOverlapX = overlapLeft < overlapRight ? overlapLeft : overlapRight;
 			int minOverlapY = overlapTop < overlapBottom ? overlapTop : overlapBottom;
 
-			if (minOverlapX < minOverlapY) ballVx = -ballVx;
-			else ballVy = -ballVy;
+			if (minOverlapX < minOverlapY) ball.vx = -ball.vx;
+			else ball.vy = -ball.vy;
 
 			blocksAlive[i] = false;
 			b->setVisible(blocksAlive[i]);
@@ -216,38 +280,18 @@ void Screen1View::checkBlockCollisions() {
 
 void Screen1View::addScore(int points) {
 	score += points;
-	Unicode::snprintf(textArea1Buffer, 10, "%d", score);
+	Unicode::snprintf(textArea1Buffer, TEXTAREA1_SIZE, "%d", score);
 	textArea1.invalidate();
 }
 
-void Screen1View::capBallSpeed() {
-	int speedSq = ballVx * ballVx + ballVy * ballVy;
-	const int maxSpeedSq = MAX_BALL_SPEED * MAX_BALL_SPEED;
-
-	if (speedSq > maxSpeedSq) {
-		int speed = isqrt(speedSq);
-
-	    // Fixed-point scaling (Q8.8)
-		int scale = (MAX_BALL_SPEED << 8) / speed;
-
-	    ballVx = (ballVx * scale) >> 8;
-	    ballVy = (ballVy * scale) >> 8;
-	}
-
-    if (abs(ballVy) < MIN_BALL_SPEED) ballVy = -MIN_BALL_SPEED;
-    if (abs(ballVx) < MIN_BALL_SPEED) {
-    	if (ballVx < 0) ballVx = -MIN_BALL_SPEED;
-    	else ballVx = MIN_BALL_SPEED;
-    }
-}
-
 void Screen1View::render() {
-	circle1.moveTo(ballX, ballY);
-	circle1.invalidate();
-	box1.moveTo(paddleX, paddleY);
-	box1.invalidate();
+	ball.ballObject.moveTo(ball.x, ball.y);
+	ball.ballObject.invalidate();
+	paddle.paddleObject.moveTo(paddle.x, paddle.y);
+	paddle.paddleObject.invalidate();
 
 	this->heartPowerUp.invalidate();
+	this->extendPowerUp.invalidate();
 
 }
 
@@ -260,11 +304,11 @@ void Screen1View::switchGameOverScreen() {
 }
 
 void Screen1View::resetBall() {
-	ballX = paddleX + paddleWidth/2 - ballRadius;
-	ballY = paddleY - 2*ballRadius;
-	circle1.moveTo(ballX, ballY);
+	ball.x = paddle.x + paddle.w/2 - ball.r;
+	ball.y = paddle.y - 2*ball.r;
+	ball.ballObject.moveTo(ball.x, ball.y);
 	begin = false;
-	initBallSpeed();
+	ball.initSpeed();
 }
 
 void Screen1View::gainLife() {
@@ -311,7 +355,7 @@ void Screen1View::newRound() {
 
 void Screen1View::spawnPowerUp() {
 	//Heart Power Up
-	this->blockIxWithHeartPowerUp = HAL_GetTick() % 24;
+	this->blockIxWithHeartPowerUp = gen_rand() % 24;
 	int boxX = blocks[blockIxWithHeartPowerUp]->getX();
 	int boxY = blocks[blockIxWithHeartPowerUp]->getY();
 	int boxWidth = blocks[blockIxWithHeartPowerUp]->getWidth();
@@ -331,7 +375,7 @@ void Screen1View::spawnPowerUp() {
 
 	//Extend paddle (Arrow) Power Up
 	do {
-		this->blockIxWithArrowPowerUp = HAL_GetTick() % 24;
+		this->blockIxWithArrowPowerUp = gen_rand() % 24;
 	} while (this->blockIxWithArrowPowerUp == this->blockIxWithHeartPowerUp);
 	boxX = blocks[blockIxWithArrowPowerUp]->getX();
 	boxY = blocks[blockIxWithArrowPowerUp]->getY();
@@ -371,8 +415,8 @@ bool Screen1View::intersectHeartPowerUp() {
 	int heartPW_Width = this->heartPowerUp.getWidth();
 	int heartPW_Height = this->heartPowerUp.getHeight();
 
-	return heartPW_X + heartPW_Width >= paddleX && heartPW_X <= paddleX + paddleWidth &&
-				heartPW_Y + heartPW_Height >= paddleY && heartPW_Y <= paddleY + paddleHeight;
+	return heartPW_X + heartPW_Width >= paddle.x && heartPW_X <= paddle.x + paddle.w &&
+				heartPW_Y + heartPW_Height >= paddle.y && heartPW_Y <= paddle.y + paddle.h;
 
 }
 
@@ -384,8 +428,8 @@ bool Screen1View::intersectArrowPowerUp() {
 	int arrowWidth = this->extendPowerUp.getWidth();
 	int arrowHeight = this->extendPowerUp.getHeight();
 
-	return arrowX + arrowWidth >= paddleX && arrowX <= paddleX + paddleWidth &&
-			arrowY + arrowHeight >= paddleY && arrowY <= paddleY + paddleHeight;
+	return arrowX + arrowWidth >= paddle.x && arrowX <= paddle.x + paddle.w &&
+			arrowY + arrowHeight >= paddle.y && arrowY <= paddle.y + paddle.h;
 
 }
 
@@ -394,32 +438,43 @@ void Screen1View::checkPowerUpCollision() {
 	if (intersectHeartPowerUp()) {
 		gainLife();
 		this->heartPowerUp.setVisible(false);
-		heartPowerUp.moveRelative(0, 30); //make the heart fall out of screen
+		this->heartPowerUp.moveRelative(0, 30); //make the heart fall out of screen
 	}
 
 	//check Arrow collision
-	if (intersectArrowPowerUp() && !isPaddleExtended) {
-		paddleWidth += PADDLE_EXTENSION;
-		this->box1.setWidth(paddleWidth);
-		if (paddleX + paddleWidth > HAL::DISPLAY_WIDTH) {
-			paddleX = HAL::DISPLAY_WIDTH - paddleWidth;
+	if (intersectArrowPowerUp() && !paddle.isExtended) {
+		paddle.w += Paddle::PADDLE_EXTENSION;
+		paddle.paddleObject.setWidth(paddle.w);
+		paddle.x -= Paddle::PADDLE_EXTENSION/2;
+		paddle.paddleObject.setX(paddle.x);
+
+		if (paddle.x + paddle.w > HAL::DISPLAY_WIDTH) {
+			paddle.x = HAL::DISPLAY_WIDTH - paddle.w;
 		}
-		this->box1.invalidate();
-		isPaddleExtended = true;
-		paddleExtendStartTick = HAL_GetTick();
+		paddle.paddleObject.invalidate();
+		paddle.isExtended = true;
+		paddle.extendStartTick = HAL_GetTick();
+
+		this->extendPowerUp.setVisible(false);
+		this->extendPowerUp.moveRelative(0, 30); //make the arrow fall out of screen
 	}
 
 }
 
 void Screen1View::checkPaddleExtensionTimeout() {
-	if (!isPaddleExtended) return;
+	if (!paddle.isExtended) return;
 
 	uint32_t now = HAL_GetTick();
-	if (now - paddleExtendStartTick >= PADDLE_EXTENSION_DURATION) {
-		isPaddleExtended = false;
+	if (now - paddle.extendStartTick >= Paddle::PADDLE_EXTENSION_DURATION) {
+		paddle.isExtended = false;
+		paddle.paddleObject.setVisible(false);
+		paddle.paddleObject.invalidate();
 
-		paddleWidth = paddleNormalWidth;
-		this->box1.setWidth(paddleWidth);
-		this->box1.invalidate();
+		paddle.w = paddle.normalw;
+		paddle.x += Paddle::PADDLE_EXTENSION/2;
+		paddle.paddleObject.setX(paddle.x);
+		paddle.paddleObject.setWidth(paddle.w);
+		paddle.paddleObject.setVisible(true);
+		paddle.paddleObject.invalidate();
 	}
 }
