@@ -54,14 +54,14 @@ static uint32_t gen_rand() {
 
 static void startSound() {
 	HAL_GPIO_WritePin(GPIOG, GPIO_PIN_13, GPIO_PIN_SET);
+	soundTicks = 0;
 	soundTicks++;
 }
 
-static const int MAX_SOUND_TICKS = 7;
+static const int MAX_SOUND_TICKS = 3;
 
 static void endSound() {
 	if (++soundTicks > MAX_SOUND_TICKS) {
-		soundTicks = 0;
 		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_13, GPIO_PIN_RESET);
 	}
 }
@@ -535,11 +535,16 @@ void Screen1View::checkPowerUpCollision() {
 		paddle.w += Paddle::PADDLE_EXTENSION;
 		paddle.paddleObject.setWidth(paddle.w);
 		paddle.x -= Paddle::PADDLE_EXTENSION/2;
-		paddle.paddleObject.setX(paddle.x);
+
+		if (paddle.x < 0) {
+			paddle.x = 0;
+		}
 
 		if (paddle.x + paddle.w > HAL::DISPLAY_WIDTH) {
 			paddle.x = HAL::DISPLAY_WIDTH - paddle.w;
 		}
+
+		paddle.paddleObject.setX(paddle.x);
 		paddle.paddleObject.invalidate();
 		paddle.isExtended = true;
 		paddle.extendStartTick = HAL_GetTick();
