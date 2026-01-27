@@ -57,8 +57,10 @@ static void startSound() {
 	soundTicks++;
 }
 
+static const int MAX_SOUND_TICKS = 7;
+
 static void endSound() {
-	if (++soundTicks > 10) {
+	if (++soundTicks > MAX_SOUND_TICKS) {
 		soundTicks = 0;
 		HAL_GPIO_WritePin(GPIOG, GPIO_PIN_13, GPIO_PIN_RESET);
 	}
@@ -79,32 +81,43 @@ void Ball::capSpeed() {
 
     int speed = isqrt(speedSq);
 
-    // Clamp max speed
+    // Clamp max speed first
     if (speed > MAX_BALL_SPEED)
     {
         vx = vx * MAX_BALL_SPEED / speed;
         vy = vy * MAX_BALL_SPEED / speed;
+        speed = MAX_BALL_SPEED;  // Update current speed after clamping
     }
 
-    // Enforce minimum vertical speed
-    if (abs(vy) < MIN_BALL_SPEED)
-        vy = (vy < 0) ? -MIN_BALL_SPEED : MIN_BALL_SPEED;
+    // If speed is below minimum, ramp it up to minimum
+    else if (speed < MIN_BALL_SPEED)
+    {
+        vx = vx * MIN_BALL_SPEED / speed;
+        vy = vy * MIN_BALL_SPEED / speed;
+        speed = MIN_BALL_SPEED;  // Update current speed after ramping up
+    }
 
-    // Enforce minimum horizontal speed
-    if (abs(vx) < 1)
-        vx = (HAL_GetTick() & 1) ? 1 : -1;
+    // Enforce minimum vertical speed component
+    if (abs(vy) < MIN_BALL_SPEED) {
+        vy = (vy < 0) ? -MIN_BALL_SPEED : MIN_BALL_SPEED;
+    }
+
+    // Enforce minimum horizontal speed component
+    if (abs(vx) < 1) vx = (HAL_GetTick() & 1) ? 1 : -1;
 }
 
 void Ball::normalizeSpeed()
 {
     int speedSq = vx * vx + vy * vy;
     if (speedSq == 0) {
-    	vx = START_BALL_SPEED;
-    	vy = START_BALL_SPEED;
+        vx = START_BALL_SPEED;
+        vy = START_BALL_SPEED;
+        return;
     }
 
     int speed = isqrt(speedSq);
 
+    // Normalize to MAX_BALL_SPEED to maintain consistent energy
     vx = vx * MAX_BALL_SPEED / speed;
     vy = vy * MAX_BALL_SPEED / speed;
 }
@@ -168,7 +181,6 @@ void Screen1View::tickEvent() {
 	checkPaddleExtensionTimeout();
 	render();
 	newRound();
-	endSound();
 }
 
 void Screen1View::updatePaddle() {
@@ -235,32 +247,42 @@ bool Screen1View::intersectPaddle(const Ball* ball) {
 			ball->y + 2*ball->r >= paddle.y && ball->y <= paddle.y + paddle.h;
 }
 
+
 void Screen1View::checkPaddleCollision() {
-	for (int i = 0; i < MAX_NUM_BALLS; i++) {
-		if (intersectPaddle(balls[i]) && balls[i]->vy > 0) {
-			startSound();
-	        int hitPos = (balls[i]->x + balls[i]->r) - paddle.x;
-	        int center = paddle.w / 2;
-	        int dx = hitPos - center;
+    for (int i = 0; i < MAX_NUM_BALLS; i++) {
+        if (intersectPaddle(balls[i]) && balls[i]->vy > 0) {
+            startSound();
+            int hitPos = (balls[i]->x + balls[i]->r) - paddle.x;
+            int center = paddle.w / 2;
+            int dx = hitPos - center;
 
-	        // Clamp hit distance
-	        if (dx > center) dx = center;
-	        if (dx < -center) dx = -center;
+            // Clamp hit distance
+            if (dx > center) dx = center;
+            if (dx < -center) dx = -center;
 
-	        // Change direction only
-	        balls[i]->vx = dx * Ball::MAX_BALL_SPEED / center;
-	        balls[i]->vy = -abs(balls[i]->vy);
+            // Calculate new direction based on hit position
+            balls[i]->vx = dx * Ball::MAX_BALL_SPEED / center;
+            balls[i]->vy = -abs(balls[i]->vy);  // Ensure upward movement
 
-	        balls[i]->vx += (HAL_GetTick() % 3) - 1;
+            // Add small random variation BEFORE normalization
+            int randomOffset = (HAL_GetTick() % 3) - 1;
+            balls[i]->vx += randomOffset;
 
-	        balls[i]->normalizeSpeed();
-		}
-	    // Prevent flat vertical shots
-	    if (balls[i]->vx == 0) balls[i]->vx = (HAL_GetTick() & 1) ? Ball::MIN_BALL_SPEED : -Ball::MIN_BALL_SPEED;
-		// Prevent straight horizontal shots
-		if (balls[i]->vy == 0) balls[i]->vy = -Ball::MIN_BALL_SPEED;
-	}
+            // Normalize to max speed to maintain energy after paddle hit
+            balls[i]->normalizeSpeed();
 
+            // Final safety checks to prevent zero velocities
+            if (balls[i]->vx == 0) {
+                balls[i]->vx = (HAL_GetTick() & 1) ? Ball::MIN_BALL_SPEED : -Ball::MIN_BALL_SPEED;
+            }
+            if (balls[i]->vy == 0) {
+                balls[i]->vy = -Ball::MIN_BALL_SPEED;
+            }
+        }
+
+        // Apply capSpeed to ensure velocity bounds are maintained after any modifications
+        balls[i]->capSpeed();
+    }
 }
 
 bool Screen1View::intersectBox(const BoxWithBorder* block, const Ball* ball) {
@@ -341,6 +363,8 @@ void Screen1View::render() {
 
 	this->heartPowerUp.invalidate();
 	this->extendPowerUp.invalidate();
+
+	endSound();
 
 }
 
