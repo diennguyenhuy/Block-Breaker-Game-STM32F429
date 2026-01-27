@@ -701,10 +701,10 @@
           {
             "Type": "TextArea",
             "Name": "textArea1",
-            "X": 103,
-            "Y": 120,
-            "Width": 115,
-            "Height": 17,
+            "X": 67,
+            "Y": 114,
+            "Width": 187,
+            "Height": 25,
             "TextId": "__SingleUse_WYJY",
             "TextRotation": "0",
             "Color": {
@@ -767,9 +767,9 @@
             "Type": "TextArea",
             "Name": "textArea1",
             "X": 88,
-            "Y": 38,
+            "Y": 35,
             "Width": 145,
-            "Height": 15,
+            "Height": 27,
             "TextId": "__SingleUse_J40X",
             "TextRotation": "0",
             "Color": {
@@ -785,10 +785,10 @@
           {
             "Type": "TextArea",
             "Name": "textArea2",
-            "X": 88,
+            "X": 48,
             "Y": 93,
-            "Width": 145,
-            "Height": 16,
+            "Width": 225,
+            "Height": 27,
             "TextId": "__SingleUse_QRXR",
             "TextRotation": "0",
             "Color": {
